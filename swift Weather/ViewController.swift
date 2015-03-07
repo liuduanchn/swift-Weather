@@ -34,7 +34,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
 
     func ios8() -> Bool {
-        return UIDevice.currentDevice().systemVersion == "8.1"
+        return UIDevice.currentDevice().systemVersion >= "8.1"
     }
     
     func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!){

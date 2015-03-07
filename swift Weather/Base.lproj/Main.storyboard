@@ -37,7 +37,6 @@
                         <outlet property="icon" destination="uHh-1T-GBI" id="qpy-eC-EeP"/>
                         <outlet property="location" destination="qLM-ob-qXs" id="vL0-9w-Bco"/>
                         <outlet property="temperature" destination="bXV-nb-dKi" id="Uj0-Ir-8zw"/>
-                        <outlet property="temprature" destination="bXV-nb-dKi" id="O9N-vk-miZ"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="En8-Vr-paJ" userLabel="First Responder" sceneMemberID="firstResponder"/>
