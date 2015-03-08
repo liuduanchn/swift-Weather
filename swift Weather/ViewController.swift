@@ -15,17 +15,28 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        let background = UIImage(named: "杨幂.jpg")
+        self.view.backgroundColor = UIColor(patternImage: background!)
+        //启动加载动画
+        self.loadingIndicator.startAnimating()
+        
+        //绑定locationMananger
         locationMananger.delegate  = self
+        
+        //locationMananger初始化
         locationMananger.desiredAccuracy = kCLLocationAccuracyBest
         if(ios8()){
             locationMananger.requestAlwaysAuthorization()
         }
+        //启动地理位置更新
         locationMananger.startUpdatingLocation()
     }
     
     @IBOutlet weak var location: UILabel!
     @IBOutlet weak var icon: UIImageView!
     @IBOutlet weak var temperature: UILabel!
+    @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var loading: UILabel!
     
 
     override func didReceiveMemoryWarning() {
@@ -38,22 +49,26 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!){
+        //获取地理位置方法的实现
         var location :CLLocation = locations[locations.count - 1] as CLLocation
         if(location.horizontalAccuracy > 0 ){
             println(location.coordinate.latitude)
             println(location.coordinate.longitude)
         }
+        //调用网络API，通过经纬度来获取天气信息
         self.updateWeatherInfo(location.coordinate.latitude,longitude:location.coordinate.longitude)
         locationMananger.stopUpdatingLocation()
         
     }
     
     func updateWeatherInfo(latitude: CLLocationDegrees,longitude: CLLocationDegrees){
+        //初始化AFNetworking的获取对象
         let manager = AFHTTPRequestOperationManager()
         let url = "http://api.openweathermap.org/data/2.5/weather"
         let params = ["lat":latitude,"lon":longitude,"cnt":0]
         manager.GET(url, parameters: params, success: { (operation:AFHTTPRequestOperation!, responseObiect: AnyObject!) in
             println("JSON:" + responseObiect.description!)
+            //返回的JSON文件调用下面的方法进行解析
             self.updateUISucess(responseObiect as NSDictionary)
             },failure: { (operation:AFHTTPRequestOperation!,error:NSError!) in
                 println("Error:"+error.localizedDescription)})
@@ -61,6 +76,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
 
     func updateUISucess(jsonResult:NSDictionary!){
+        //关闭加载提示
+        self.loadingIndicator.hidden = true
+        self.loadingIndicator.stopAnimating()
+        self.loading.text = nil
+        
+        //如果没有main，或者下面没有temp，则进入else
         if let tempResult = jsonResult["main"]?["temp"]? as? Double{
             var temper: Double
             if(jsonResult["sys"]?["country"]? as String == "US"){
@@ -80,19 +101,19 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             var condition = jsonResult["weather"]?[0]!["id"] as Int
             var sunrise = jsonResult["sys"]?["sunrise"] as Double
             var sunset = jsonResult["sys"]?["sunset"] as Double
-            
+            //判断白天或者是黑夜
             var nightTime = false
             var now = NSDate().timeIntervalSince1970
             // println(nowAsLong)
-            
             if (now < sunrise || now > sunset) {
                 nightTime = true
             }
+            //调用新方法更新天气图标
             self.updateWeatherIcon(condition, nightTime: nightTime)
         }
         else
         {
-            
+            self.loading.text = "天气信息不可用"
         }
     }
     
@@ -165,6 +186,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     
     func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!){
         println(error)
+        self.loading.text = "地理位置不可用"
     }
 }
 
